@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Encuesta · Chapter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+/* ── ADMIN ─────────────────────────────────── */
+#adm-ov{display:none;position:fixed;inset:0;background:rgba(42,35,41,.65);z-index:9999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#adm-tog:checked~#adm-ov{display:flex}
+#adm-ov.open{display:flex}
+#adm-box{background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 12px 40px rgba(0,0,0,.2);margin:auto}
+#adm-head{display:flex;align-items:center;justify-content:space-between;padding:20px 26px 16px;border-bottom:1px solid #E8E4E7}
+#adm-head h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:#2A2329}
+#adm-x{background:none;border:none;font-size:22px;color:#AFA8AE;cursor:pointer;padding:2px 6px;line-height:1}
+#adm-x:hover{color:#2A2329}
+.ab{padding:20px 26px}
+.atip{background:#F0EDF0;border-radius:8px;padding:11px 14px;font-size:13px;color:#756977;line-height:1.5;margin-bottom:18px}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:600;color:#2A2329;margin-bottom:5px}
+.fi,.fs{border:1.5px solid #E8E4E7;border-radius:8px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;color:#2A2329;background:#fff;outline:none;transition:border-color .15s;width:100%}
+.fi:focus,.fs:focus{border-color:#756977}
+.fs{cursor:pointer}
+.frow{display:flex;gap:10px}.frow .fs{flex:1}
+.fhint{font-size:12px;color:#AFA8AE;margin-top:5px;line-height:1.5}
+.asec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#AFA8AE;padding-top:20px;margin:20px 0 14px;border-top:1px solid #E8E4E7}
+.xqb{border:1.5px solid #E8E4E7;border-radius:10px;padding:14px;margin-bottom:12px}
+.xqb .fg{margin-bottom:10px}.xqb .fg:last-child{margin-bottom:0}
+#adm-foot{display:flex;gap:10px;flex-wrap:wrap;padding:16px 26px 22px;border-top:1px solid #E8E4E7}
+.adl{flex:1;background:none;border:1.5px solid #E8E4E7;border-radius:8px;padding:11px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#756977;cursor:pointer;transition:all .15s;text-align:center}
+.adl:hover{border-color:#756977;background:#F0EDF0}
+.ads{flex:2;background:#756977;border:none;border-radius:8px;padding:12px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:background .15s}
+.ads:hover{background:#5A5060}
+
+/* ── VARIABLES Y BASE ───────────────────────── */
+:root{--pl:#756977;--pld:#5A5060;--plx:#F0EDF0;--ln:#F7F5F3;--eb:#2A2329;--sl:#AFA8AE;--bd:#E8E4E7;--wh:#FFFFFF;--ok:#4A7C59;--re:#C0392B;--am:#D4891A;--rsm:8px;--ez:.18s cubic-bezier(.4,0,.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--ln);color:var(--eb);min-height:100vh;padding:32px 16px 56px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:600px}
+
+/* ── TODOS LOS RADIO INPUTS OCULTOS ────────── */
+.hr{display:none}
+
+/* ── NAVEGACIÓN CSS-ONLY ────────────────────── */
+/* Todas las secciones ocultas por defecto */
+.sec{display:none}
+
+/* Mostrar sección según step radio checked */
+#s0:checked~.wrap #sec0{display:block}
+#s1:checked~.wrap #sec1{display:block}
+#s2:checked~.wrap #sec2{display:block}
+#s3:checked~.wrap #sec3{display:block}
+#s4:checked~.wrap #sec4{display:block}
+#stk:checked~.wrap #sectk{display:block}
+
+/* Barra de progreso: oculta en intro y gracias */
+.pg{display:none}
+#s1:checked~.wrap .pg,#s2:checked~.wrap .pg,
+#s3:checked~.wrap .pg,#s4:checked~.wrap .pg{display:block}
+
+/* Barras de progreso activas */
+#s1:checked~.wrap #pi1,
+#s2:checked~.wrap #pi1,#s2:checked~.wrap #pi2,
+#s3:checked~.wrap #pi1,#s3:checked~.wrap #pi2,#s3:checked~.wrap #pi3,
+#s4:checked~.wrap #pi1,#s4:checked~.wrap #pi2,#s4:checked~.wrap #pi3,#s4:checked~.wrap #pi4{background:var(--pl)}
+
+/* Texto del paso */
+.pg1,.pg2,.pg3,.pg4{display:none}
+#s1:checked~.wrap .pg1{display:inline}
+#s2:checked~.wrap .pg2{display:inline}
+#s3:checked~.wrap .pg3{display:inline}
+#s4:checked~.wrap .pg4{display:inline}
+
+/* ── NPS COLORES ────────────────────────────── */
+#nps-0:checked+.nb,#nps-1:checked+.nb,#nps-2:checked+.nb,
+#nps-3:checked+.nb,#nps-4:checked+.nb,#nps-5:checked+.nb,
+#nps-6:checked+.nb{background:var(--re);border-color:var(--re);color:#fff}
+#nps-7:checked+.nb,#nps-8:checked+.nb{background:var(--am);border-color:var(--am);color:#fff}
+#nps-9:checked+.nb,#nps-10:checked+.nb{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* ── CSAT ESTRELLAS ─────────────────────────── */
+#cs1:checked~.sr label[for="cs1"]{color:var(--pl)}
+#cs2:checked~.sr label[for="cs1"],#cs2:checked~.sr label[for="cs2"]{color:var(--pl)}
+#cs3:checked~.sr label[for="cs1"],#cs3:checked~.sr label[for="cs2"],#cs3:checked~.sr label[for="cs3"]{color:var(--pl)}
+#cs4:checked~.sr label[for="cs1"],#cs4:checked~.sr label[for="cs2"],#cs4:checked~.sr label[for="cs3"],#cs4:checked~.sr label[for="cs4"]{color:var(--pl)}
+#cs5:checked~.sr label{color:var(--pl)}
+/* Texto descriptivo CSAT */
+.clt{display:none}
+#cs1:checked~.cl .clt:nth-child(1){display:inline}
+#cs2:checked~.cl .clt:nth-child(2){display:inline}
+#cs3:checked~.cl .clt:nth-child(3){display:inline}
+#cs4:checked~.cl .clt:nth-child(4){display:inline}
+#cs5:checked~.cl .clt:nth-child(5){display:inline}
+
+/* ── DIMENSIONES ────────────────────────────── */
+.hr:checked+.db{background:var(--pl);border-color:var(--pl);color:#fff}
+
+/* ── LOGO Y TIPOGRAFÍA ──────────────────────── */
+.la{display:flex;flex-direction:column;align-items:center;margin-bottom:28px}
+.lc{width:54px;height:54px;background:var(--pl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:9px;cursor:default;user-select:none}
+.lch{font-family:'Barlow Condensed','Arial Black',sans-serif;font-weight:700;font-size:18px;color:#fff;letter-spacing:.5px;line-height:1}
+.ls{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--pl);text-transform:uppercase}
+.pg{margin-bottom:22px}.pgl{display:flex;gap:5px;margin-bottom:6px}
+.pgi{flex:1;height:2px;border-radius:1px;background:var(--bd);transition:background var(--ez)}
+.pgm{display:flex;justify-content:space-between;font-size:12px;color:var(--sl);font-weight:500}
+.card{background:var(--wh);border-radius:14px;border:1px solid var(--bd);overflow:hidden}.cb{padding:40px}
+.ey{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pl);margin-bottom:6px}
+.st{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:var(--eb);margin-bottom:8px}
+.sd{font-size:15px;color:var(--sl);line-height:1.55}
+.ql{font-size:14px;font-weight:600;color:var(--eb);margin-bottom:10px}
+.dv{height:1px;background:var(--bd);margin:26px 0}
+
+/* ── NPS GRID ───────────────────────────────── */
+.ng{display:grid;grid-template-columns:repeat(11,1fr);gap:5px}
+.nb{display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bd);border-radius:var(--rsm);background:var(--wh);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--sl);cursor:pointer;aspect-ratio:1;transition:all var(--ez);-webkit-tap-highlight-color:transparent}
+.nb:hover{border-color:var(--pl);color:var(--pl)}
+.nax{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--sl)}
+
+/* ── CSAT STARS ─────────────────────────────── */
+.sr{display:flex;gap:4px;margin-top:4px}
+.sb{font-size:38px;color:var(--bd);cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent;transition:color var(--ez)}
+.cl{font-size:14px;color:var(--pl);margin-top:10px;min-height:18px;font-weight:500}
+
+/* ── DIMENSIONES ────────────────────────────── */
+.dr{padding:18px 0;border-bottom:1px solid var(--bd)}.dr:first-child{padding-top:0}.dr:last-child{border-bottom:none;padding-bottom:0}
+.dbr{display:flex;gap:8px;margin-top:10px}
+.db{width:44px;height:44px;border:1.5px solid var(--bd);border-radius:var(--rsm);background:var(--wh);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--sl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--ez);-webkit-tap-highlight-color:transparent}
+.db:hover{border-color:var(--pl);color:var(--pl)}
+.da{display:flex;justify-content:space-between;font-size:11px;color:var(--sl);margin-top:6px;max-width:240px}
+
+/* ── TEXTAREAS ──────────────────────────────── */
+.ob{margin-bottom:22px}
+textarea.ti{width:100%;border:1.5px solid var(--bd);border-radius:var(--rsm);padding:13px 15px;font-family:'Inter',sans-serif;font-size:14px;color:var(--eb);background:var(--wh);resize:vertical;min-height:88px;outline:none;transition:border-color var(--ez);margin-top:8px;line-height:1.5}
+textarea.ti:focus{border-color:var(--pl)}textarea.ti::placeholder{color:var(--sl)}
+
+/* ── BOTONES NAVEGACIÓN (son labels) ────────── */
+.nv{display:flex;justify-content:space-between;align-items:center;margin-top:32px;gap:12px}
+.bk{background:none;color:var(--sl);border:1.5px solid var(--bd);border-radius:var(--rsm);padding:12px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;-webkit-tap-highlight-color:transparent;transition:all var(--ez)}
+.bk:hover{border-color:var(--pl);color:var(--pl)}
+.bn{background:var(--pl);color:#fff;border:none;border-radius:var(--rsm);padding:13px 24px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:background var(--ez)}
+.bn:hover{background:var(--pld)}
+
+/* ── INTRO, GRACIAS ─────────────────────────── */
+.ib{text-align:center;padding:52px 40px}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--plx);color:var(--pl);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;margin-bottom:22px}
+.in{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:38px;color:var(--eb);margin-bottom:12px;line-height:1.1}
+.it{font-size:15px;color:var(--sl);line-height:1.65;margin-bottom:32px}
+.tb{text-align:center;padding:60px 40px}
+.ck{width:64px;height:64px;background:var(--ok);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px}
+.tt{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:36px;color:var(--eb);margin-bottom:10px}
+.tx{font-size:15px;color:var(--sl);line-height:1.65}
+
+/* ── ERROR Y FOOTER ─────────────────────────── */
+.er{background:#FDEAEA;border:1px solid #F5C6C6;border-radius:var(--rsm);padding:12px 14px;font-size:13px;color:var(--re);margin-top:14px;display:none}
+.ft{text-align:center;margin-top:18px;font-size:12px;color:var(--sl)}
+.at{font-size:11px;color:#d4cfd3;cursor:pointer;transition:color .15s}.at:hover{color:var(--pl)}
+
+@media(max-width:480px){body{padding:20px 12px 44px}.cb{padding:28px 20px}.ib,.tb{padding:40px 20px}.nb{font-size:13px}.ng{gap:3px}.st{font-size:26px}.sb{font-size:30px}.db{width:40px;height:40px;font-size:15px}}
+</style>
+</head>
+<body>
+
+<!-- ADMIN TOGGLE CSS-ONLY -->
+<input type="checkbox" id="adm-tog" class="hr">
+
+<!-- ════ PANEL ADMIN ════ -->
+<div id="adm-ov" class="">
+  <div id="adm-box">
+    <div id="adm-head">
+      <h2>⚙ Configurar encuesta</h2>
+      <label for="adm-tog" id="adm-x" style="cursor:pointer;background:none;border:none;font-size:22px;color:#AFA8AE;padding:2px 6px;line-height:1;border-radius:6px;">✕</label>
+    </div>
+    <div class="ab">
+      <div class="atip">Solo tú ves este panel. <strong>Triple clic en el logo CH</strong> para abrirlo.</div>
+      <div class="fg"><label class="fl">Nombre de la empresa</label><input class="fi" id="ac" type="text" placeholder="Ej: Grupo Empresarial ABC"></div>
+      <div class="fg"><label class="fl">Nombre del contacto</label><input class="fi" id="an" type="text" placeholder="Ej: María"></div>
+      <div class="fg"><label class="fl">Período</label>
+        <div class="frow">
+          <select class="fs" id="aq"><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select>
+          <select class="fs" id="ay"><option>2025</option><option selected="">2026</option><option>2027</option><option>2028</option></select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">URL del endpoint (Google Apps Script)</label>
+        <input class="fi" id="af" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+        <div class="fhint">Si lo dejas vacío funciona en <strong>modo de prueba</strong>.</div>
+      </div>
+      <div class="asec">Preguntas adicionales opcionales</div>
+      <div class="xqb">
+        <div class="fg"><label class="fl" style="font-size:12px">Pregunta extra 1 · Tipo</label>
+          <select class="fs" id="at1" onchange="xqt(1)" style="width:100%"><option value="">— Sin pregunta —</option><option value="r">Puntuación 1 a 5</option><option value="o">Texto libre</option></select>
+        </div>
+        <div id="xt1" style="display: block;"><label class="fl" style="font-size:12px">Escribe la pregunta</label><input class="fi" id="aq1" type="text" placeholder="Ej: ¿Cómo evalúas nuestra estrategia?"></div>
+      </div>
+      <div class="xqb">
+        <div class="fg"><label class="fl" style="font-size:12px">Pregunta extra 2 · Tipo</label>
+          <select class="fs" id="at2" onchange="xqt(2)" style="width:100%"><option value="">— Sin pregunta —</option><option value="r">Puntuación 1 a 5</option><option value="o">Texto libre</option></select>
+        </div>
+        <div id="xt2" style="display: block;"><label class="fl" style="font-size:12px">Escribe la pregunta</label><input class="fi" id="aq2" type="text" placeholder="Tu pregunta..."></div>
+      </div>
+    </div>
+    <div id="adm-foot" style="flex-direction:column;gap:8px;">
+      <button class="adl" onclick="testConexion()" style="flex:none;width:100%;background:#F0EDF0;color:#756977;border-color:#756977;">
+        ▶ Probar conexión con Google Sheets
+      </button>
+      <div id="test-result" style="display: block; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; background: rgb(212, 237, 218); color: rgb(21, 87, 36);">✅ Conexión activa. Ahora haz clic en Guardar y descargar, llena la encuesta desde ese archivo y verifica el Sheet.</div>
+      <div style="display:flex;gap:10px;width:100%;">
+        <button class="adl" onclick="dlClient()" style="flex:1;">↓ Descargar para cliente</button>
+        <button class="ads" onclick="saveAdm()" style="flex:2;">↓ Guardar y descargar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RADIOS DE NAVEGACIÓN (CSS-only) ════ -->
+<!-- Deben estar ANTES de .wrap para que el selector ~ funcione -->
+<input type="radio" name="step" id="s0" class="hr" checked="">
+<input type="radio" name="step" id="s1" class="hr">
+<input type="radio" name="step" id="s2" class="hr">
+<input type="radio" name="step" id="s3" class="hr">
+<input type="radio" name="step" id="s4" class="hr">
+<input type="radio" name="step" id="stk" class="hr">
+
+<!-- ════ ENCUESTA ════ -->
+<div class="wrap">
+
+  <!-- Logo -->
+  <div class="la">
+    <div class="lc" id="logo"><span class="lch">CH</span></div>
+    <span class="ls">Chapter™</span>
+  </div>
+
+  <!-- Barra de progreso (CSS controla visibilidad y fill) -->
+  <div class="pg">
+    <div class="pgl">
+      <div class="pgi" id="pi1"></div><div class="pgi" id="pi2"></div>
+      <div class="pgi" id="pi3"></div><div class="pgi" id="pi4"></div>
+    </div>
+    <div class="pgm">
+      <span>
+        <span class="pg1">Paso 1 de 4</span><span class="pg2">Paso 2 de 4</span>
+        <span class="pg3">Paso 3 de 4</span><span class="pg4">Paso 4 de 4</span>
+      </span>
+      <span>
+        <span class="pg1">25%</span><span class="pg2">50%</span>
+        <span class="pg3">75%</span><span class="pg4">100%</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── SEC 0: INTRO ── -->
+  <div class="sec" id="sec0"><div class="card"><div class="ib">
+    <div class="pill">⏱ Menos de 3 minutos</div>
+    <div class="in">Hola, <span id="en">Jorge</span></div>
+    <p class="it">Queremos seguir siendo la mejor agencia para tu negocio.<br>Tu opinión nos ayuda a mejorar cada trimestre.<br>Esta encuesta es completamente confidencial.</p>
+    <label for="s1" class="bn" style="margin:0 auto;">Comenzar &nbsp;→</label>
+  </div></div></div>
+
+  <!-- ── SEC 1: NPS ── -->
+  <div class="sec" id="sec1"><div class="card"><div class="cb">
+    <div class="ey">1 de 4 · Recomendación</div>
+    <h2 class="st">¿Nos recomendarías?</h2>
+    <p class="sd">En una escala del 0 al 10, ¿qué tan probable es que recomiendes Chapter a otro negocio?</p>
+    <div class="dv"></div>
+    <!-- NPS: radio+label pares en la grilla. display:none quita radios del flujo del grid -->
+    <div class="ng">
+      <input type="radio" name="nps" id="nps-0" value="0" class="hr"><label for="nps-0" class="nb">0</label>
+      <input type="radio" name="nps" id="nps-1" value="1" class="hr"><label for="nps-1" class="nb">1</label>
+      <input type="radio" name="nps" id="nps-2" value="2" class="hr"><label for="nps-2" class="nb">2</label>
+      <input type="radio" name="nps" id="nps-3" value="3" class="hr"><label for="nps-3" class="nb">3</label>
+      <input type="radio" name="nps" id="nps-4" value="4" class="hr"><label for="nps-4" class="nb">4</label>
+      <input type="radio" name="nps" id="nps-5" value="5" class="hr"><label for="nps-5" class="nb">5</label>
+      <input type="radio" name="nps" id="nps-6" value="6" class="hr"><label for="nps-6" class="nb">6</label>
+      <input type="radio" name="nps" id="nps-7" value="7" class="hr"><label for="nps-7" class="nb">7</label>
+      <input type="radio" name="nps" id="nps-8" value="8" class="hr"><label for="nps-8" class="nb">8</label>
+      <input type="radio" name="nps" id="nps-9" value="9" class="hr"><label for="nps-9" class="nb">9</label>
+      <input type="radio" name="nps" id="nps-10" value="10" class="hr"><label for="nps-10" class="nb">10</label>
+    </div>
+    <div class="nax"><span>Nada probable</span><span>Muy probable</span></div>
+    <div class="nv"><label for="s0" class="bk">← Atrás</label><label for="s2" class="bn">Continuar →</label></div>
+  </div></div></div>
+
+  <!-- ── SEC 2: CSAT ── -->
+  <div class="sec" id="sec2"><div class="card"><div class="cb">
+    <div class="ey">2 de 4 · Satisfacción general</div>
+    <h2 class="st">¿Qué tal lo hemos hecho?</h2>
+    <p class="sd">¿Cómo calificarías tu experiencia general con Chapter en este trimestre?</p>
+    <div class="dv"></div>
+    <!-- CSAT: radios ANTES de .sr para que ~ funcione -->
+    <input type="radio" name="csat" id="cs5" value="5" class="hr">
+    <input type="radio" name="csat" id="cs4" value="4" class="hr">
+    <input type="radio" name="csat" id="cs3" value="3" class="hr">
+    <input type="radio" name="csat" id="cs2" value="2" class="hr">
+    <input type="radio" name="csat" id="cs1" value="1" class="hr">
+    <div class="sr">
+      <label for="cs1" class="sb">★</label>
+      <label for="cs2" class="sb">★</label>
+      <label for="cs3" class="sb">★</label>
+      <label for="cs4" class="sb">★</label>
+      <label for="cs5" class="sb">★</label>
+    </div>
+    <div class="cl">
+      <span class="clt">Muy insatisfecho</span><span class="clt">Insatisfecho</span>
+      <span class="clt">Regular</span><span class="clt">Satisfecho</span><span class="clt">Muy satisfecho</span>
+    </div>
+    <div class="nv"><label for="s1" class="bk">← Atrás</label><label for="s3" class="bn">Continuar →</label></div>
+  </div></div></div>
+
+  <!-- ── SEC 3: DIMENSIONES (JS construye el contenido) ── -->
+  <div class="sec" id="sec3"><div class="card"><div class="cb">
+    <div class="ey">3 de 4 · Nuestro trabajo</div>
+    <h2 class="st">Evalúa cada área</h2>
+    <p class="sd">Califica del 1 (muy malo) al 5 (excelente).</p>
+    <div class="dv"></div>
+    <div id="dw"><div class="dr"><div class="ql">Comunicación</div><div class="dbr"><input type="radio" name="dim-comunicacion" id="dim-comunicacion-1" value="1" class="hr"><label for="dim-comunicacion-1" class="db">1</label><input type="radio" name="dim-comunicacion" id="dim-comunicacion-2" value="2" class="hr"><label for="dim-comunicacion-2" class="db">2</label><input type="radio" name="dim-comunicacion" id="dim-comunicacion-3" value="3" class="hr"><label for="dim-comunicacion-3" class="db">3</label><input type="radio" name="dim-comunicacion" id="dim-comunicacion-4" value="4" class="hr"><label for="dim-comunicacion-4" class="db">4</label><input type="radio" name="dim-comunicacion" id="dim-comunicacion-5" value="5" class="hr"><label for="dim-comunicacion-5" class="db">5</label></div><div class="da"><span>Muy mala</span><span>Excelente</span></div></div><div class="dr"><div class="ql">Resultados de campañas</div><div class="dbr"><input type="radio" name="dim-resultados" id="dim-resultados-1" value="1" class="hr"><label for="dim-resultados-1" class="db">1</label><input type="radio" name="dim-resultados" id="dim-resultados-2" value="2" class="hr"><label for="dim-resultados-2" class="db">2</label><input type="radio" name="dim-resultados" id="dim-resultados-3" value="3" class="hr"><label for="dim-resultados-3" class="db">3</label><input type="radio" name="dim-resultados" id="dim-resultados-4" value="4" class="hr"><label for="dim-resultados-4" class="db">4</label><input type="radio" name="dim-resultados" id="dim-resultados-5" value="5" class="hr"><label for="dim-resultados-5" class="db">5</label></div><div class="da"><span>Muy malos</span><span>Excelentes</span></div></div><div class="dr"><div class="ql">Reportes mensuales</div><div class="dbr"><input type="radio" name="dim-reportes" id="dim-reportes-1" value="1" class="hr"><label for="dim-reportes-1" class="db">1</label><input type="radio" name="dim-reportes" id="dim-reportes-2" value="2" class="hr"><label for="dim-reportes-2" class="db">2</label><input type="radio" name="dim-reportes" id="dim-reportes-3" value="3" class="hr"><label for="dim-reportes-3" class="db">3</label><input type="radio" name="dim-reportes" id="dim-reportes-4" value="4" class="hr"><label for="dim-reportes-4" class="db">4</label><input type="radio" name="dim-reportes" id="dim-reportes-5" value="5" class="hr"><label for="dim-reportes-5" class="db">5</label></div><div class="da"><span>Muy malos</span><span>Excelentes</span></div></div><div class="dr"><div class="ql">Creatividades y contenido</div><div class="dbr"><input type="radio" name="dim-creatividades" id="dim-creatividades-1" value="1" class="hr"><label for="dim-creatividades-1" class="db">1</label><input type="radio" name="dim-creatividades" id="dim-creatividades-2" value="2" class="hr"><label for="dim-creatividades-2" class="db">2</label><input type="radio" name="dim-creatividades" id="dim-creatividades-3" value="3" class="hr"><label for="dim-creatividades-3" class="db">3</label><input type="radio" name="dim-creatividades" id="dim-creatividades-4" value="4" class="hr"><label for="dim-creatividades-4" class="db">4</label><input type="radio" name="dim-creatividades" id="dim-creatividades-5" value="5" class="hr"><label for="dim-creatividades-5" class="db">5</label></div><div class="da"><span>Muy malas</span><span>Excelentes</span></div></div><div class="dr"><div class="ql">Velocidad de respuesta</div><div class="dbr"><input type="radio" name="dim-velocidad" id="dim-velocidad-1" value="1" class="hr"><label for="dim-velocidad-1" class="db">1</label><input type="radio" name="dim-velocidad" id="dim-velocidad-2" value="2" class="hr"><label for="dim-velocidad-2" class="db">2</label><input type="radio" name="dim-velocidad" id="dim-velocidad-3" value="3" class="hr"><label for="dim-velocidad-3" class="db">3</label><input type="radio" name="dim-velocidad" id="dim-velocidad-4" value="4" class="hr"><label for="dim-velocidad-4" class="db">4</label><input type="radio" name="dim-velocidad" id="dim-velocidad-5" value="5" class="hr"><label for="dim-velocidad-5" class="db">5</label></div><div class="da"><span>Muy lenta</span><span>Excelente</span></div></div><div class="dr"><div class="ql">estrategia</div><div class="dbr"><input type="radio" name="dim-xr1" id="dim-xr1-1" value="1" class="hr"><label for="dim-xr1-1" class="db">1</label><input type="radio" name="dim-xr1" id="dim-xr1-2" value="2" class="hr"><label for="dim-xr1-2" class="db">2</label><input type="radio" name="dim-xr1" id="dim-xr1-3" value="3" class="hr"><label for="dim-xr1-3" class="db">3</label><input type="radio" name="dim-xr1" id="dim-xr1-4" value="4" class="hr"><label for="dim-xr1-4" class="db">4</label><input type="radio" name="dim-xr1" id="dim-xr1-5" value="5" class="hr"><label for="dim-xr1-5" class="db">5</label></div><div class="da"><span>Muy malo</span><span>Excelente</span></div></div><div class="dr"><div class="ql">comunicación</div><div class="dbr"><input type="radio" name="dim-xr2" id="dim-xr2-1" value="1" class="hr"><label for="dim-xr2-1" class="db">1</label><input type="radio" name="dim-xr2" id="dim-xr2-2" value="2" class="hr"><label for="dim-xr2-2" class="db">2</label><input type="radio" name="dim-xr2" id="dim-xr2-3" value="3" class="hr"><label for="dim-xr2-3" class="db">3</label><input type="radio" name="dim-xr2" id="dim-xr2-4" value="4" class="hr"><label for="dim-xr2-4" class="db">4</label><input type="radio" name="dim-xr2" id="dim-xr2-5" value="5" class="hr"><label for="dim-xr2-5" class="db">5</label></div><div class="da"><span>Muy malo</span><span>Excelente</span></div></div></div>
+    <div class="nv"><label for="s2" class="bk">← Atrás</label><label for="s4" class="bn">Continuar →</label></div>
+  </div></div></div>
+
+  <!-- ── SEC 4: TEXTO LIBRE ── -->
+  <div class="sec" id="sec4"><div class="card"><div class="cb">
+    <div class="ey">4 de 4 · Tu voz</div>
+    <h2 class="st">Cuéntanos más</h2>
+    <p class="sd">Opcional, pero muy valioso para nosotros.</p>
+    <div class="dv"></div>
+    <div class="ob"><div class="ql">¿Qué podríamos hacer mejor?</div><textarea class="ti" id="tm" placeholder="Cuéntanos en qué podemos mejorar..."></textarea></div>
+    <div class="ob"><div class="ql">¿Qué es lo que más valoras de trabajar con nosotros?</div><textarea class="ti" id="tv" placeholder="Lo que más te gusta de nuestra relación..."></textarea></div>
+    <div class="ob" id="xo1" style="display:none"><div class="ql" id="xo1l"></div><textarea class="ti" id="te1" placeholder="Tu respuesta..."></textarea></div>
+    <div class="ob" id="xo2" style="display:none"><div class="ql" id="xo2l"></div><textarea class="ti" id="te2" placeholder="Tu respuesta..."></textarea></div>
+    <div class="er" id="erbn">No pudimos enviar. Por favor intenta de nuevo.</div>
+    <!-- El label "Enviar" activa #stk via CSS Y dispara sendSurveyData via change event en JS -->
+    <div class="nv">
+      <label for="s3" class="bk">← Atrás</label>
+      <label for="stk" class="bn" id="lbl-enviar" onclick="sendSurveyData()">Enviar encuesta ✓</label>
+    </div>
+  </div></div></div>
+
+  <!-- ── SEC GRACIAS ── -->
+  <div class="sec" id="sectk"><div class="card"><div class="tb">
+    <div class="ck"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14L11 19.5L22 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+    <div class="tt">¡Muchas gracias!</div>
+    <p class="tx">Tu opinión llega directamente al equipo de Chapter.<br>Nos comprometemos a mejorar cada trimestre para ti.</p>
+  </div></div></div>
+
+  <div class="ft">
+    Encuesta de satisfacción trimestral · Chapter™ · <span id="ep">Q3 2026</span>
+    &nbsp;·&nbsp;<label for="adm-tog" style="font-size:11px;color:#d4cfd3;cursor:pointer;">⚙ Admin</label>
+  </div>
+</div><!-- /wrap -->
+
+<script>
+/* ════ CONFIG ════ */
+const LS='ch_nps_v4';
+const DIMS_BASE=[
+  {k:'comunicacion',lbl:'Comunicación',lo:'Muy mala',hi:'Excelente'},
+  {k:'resultados',lbl:'Resultados de campañas',lo:'Muy malos',hi:'Excelentes'},
+  {k:'reportes',lbl:'Reportes mensuales',lo:'Muy malos',hi:'Excelentes'},
+  {k:'creatividades',lbl:'Creatividades y contenido',lo:'Muy malas',hi:'Excelentes'},
+  {k:'velocidad',lbl:'Velocidad de respuesta',lo:'Muy lenta',hi:'Excelente'},
+];
+const CTXT=['','Muy insatisfecho','Insatisfecho','Regular','Satisfecho','Muy satisfecho'];
+function lsCFG(){
+  // Migración: busca config en claves anteriores si la actual está vacía
+  const keys=['ch_nps_v4','ch_nps_v3','ch_nps_v2','ch_nps','chapter_nps_cfg'];
+  for(const k of keys){
+    try{const d=JSON.parse(localStorage.getItem(k));if(d&&(d.c||d.clientName||d.f||d.formspreeUrl))return d;}catch{}
+  }
+  return {};
+}
+function svCFG(c){try{localStorage.setItem(LS,JSON.stringify(c));}catch{}}
+/*CFG_START*/
+let CFG={"c":"Yorch","n":"Jorge","q":"Q3","y":"2026","f":"https://script.google.com/macros/s/AKfycbw_98xh1phvRMo76F7OX1CFl36xbOecNgxlI9RnbFOuMOS3kc8LUUr3kXEw4CYZ3LrSHA/exec","t1":"r","q1":"estrategia","t2":"r","q2":"comunicación"};
+/*CFG_END*/
+
+window.addEventListener('DOMContentLoaded',()=>{
+  /* Scroll al tope en cada cambio de paso (JS solo para UX, no para navegación) */
+  document.querySelectorAll('input[name="step"]').forEach(r=>{
+    r.addEventListener('change',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  });
+
+  /* Cuando llegan a "gracias" → enviar datos */
+  document.getElementById('stk').addEventListener('change',function(){
+    if(this.checked) sendSurveyData();
+  });
+
+  /* Triple clic en logo → admin */
+  let lc=0,lt;
+  document.getElementById('logo').addEventListener('click',()=>{
+    lc++;clearTimeout(lt);
+    if(lc>=3){lc=0;openAdmin();}
+    else lt=setTimeout(()=>{lc=0;},700);
+  });
+
+  if(!CFG.c||!CFG.f){const t=document.getElementById('adm-tog');if(t)t.checked=true;}
+  applyUI();
+});
+
+/* ════ ADMIN ════ */
+function openAdmin(){
+  document.getElementById('ac').value=CFG.c||'';
+  document.getElementById('an').value=CFG.n||'';
+  document.getElementById('aq').value=CFG.q||'Q2';
+  document.getElementById('ay').value=CFG.y||'2026';
+  document.getElementById('af').value=CFG.f||'';
+  document.getElementById('at1').value=CFG.t1||'';
+  document.getElementById('aq1').value=CFG.q1||'';
+  document.getElementById('at2').value=CFG.t2||'';
+  document.getElementById('aq2').value=CFG.q2||'';
+  xqt(1);xqt(2);
+  document.getElementById('adm-ov').classList.add('open');
+}
+function closeAdmin(){document.getElementById('adm-ov').classList.remove('open');}
+function xqt(n){document.getElementById('xt'+n).style.display=document.getElementById('at'+n).value?'block':'none';}
+function readForm(){return{c:document.getElementById('ac').value.trim(),n:document.getElementById('an').value.trim(),q:document.getElementById('aq').value,y:document.getElementById('ay').value,f:document.getElementById('af').value.trim(),t1:document.getElementById('at1').value,q1:document.getElementById('aq1').value.trim(),t2:document.getElementById('at2').value,q2:document.getElementById('aq2').value.trim()};}
+/* ═══ TEST DE CONEXIÓN ════════════════════════════════════════════ */
+async function testConexion() {
+  const url = document.getElementById('af').value.trim();
+  const res = document.getElementById('test-result');
+  res.style.display = 'block';
+  res.style.background = '#F0EDF0';
+  res.style.color = '#756977';
+  res.textContent = 'Probando conexión...';
+
+  if (!url || url.length < 30) {
+    res.style.background='#FDEAEA';res.style.color='#C0392B';
+    res.textContent='⚠ Primero pega la URL de tu Apps Script.';return;
+  }
+
+  try {
+    // Fetch directo con CORS — funciona en Mac Chrome
+    const r = await fetch(url + '?verify=1&t=' + Date.now());
+    const txt = await r.text();
+    if (txt.includes('NPS OK') || txt.includes('ok') || r.ok) {
+      res.style.background='#D4EDDA';res.style.color='#155724';
+      res.textContent='✅ Conexión activa. Ahora haz clic en Guardar y descargar, llena la encuesta desde ese archivo y verifica el Sheet.';
+      return;
+    }
+  } catch(e) {
+    // En iOS o si CORS falla, intentar con imagen
+  }
+
+  // Fallback: image beacon — funciona desde cualquier origen
+  try {
+    const ok = await new Promise(function(resolve) {
+      var done = false;
+      var img = new Image();
+      // onload Y onerror ambos = servidor respondió (cualquier respuesta = reachable)
+      img.onload = img.onerror = function(){ if(!done){done=true;resolve(true);} };
+      img.src = url + '?verify=1&t=' + Date.now();
+      setTimeout(function(){ if(!done){done=true;resolve(false);} }, 8000);
+    });
+    if (ok) {
+      res.style.background='#D4EDDA';res.style.color='#155724';
+      res.textContent='✅ Servidor activo. Guarda y descarga la encuesta, llénala y revisa el Sheet.';
+    } else {
+      res.style.background='#FDEAEA';res.style.color='#C0392B';
+      res.textContent='❌ No se pudo contactar el servidor. Verifica la URL y que el Apps Script esté publicado como "Cualquier persona".';
+    }
+  } catch(e) {
+    res.style.background='#FDEAEA';res.style.color='#C0392B';
+    res.textContent='❌ Error: ' + e.message;
+  }
+}
+
+
+/* ═══ DESCARGAR VERSIÓN CON CONFIG EMBEBIDA ═══════════════════════════
+   Solución definitiva: la config queda dentro del HTML, no en localStorage
+   Así funciona igual desde cualquier dispositivo sin re-configurar.
+═══════════════════════════════════════════════════════════════════════ */
+function downloadConfigured() {
+  // Cerrar admin para captura limpia
+  const tog = document.getElementById('adm-tog');
+  if (tog) tog.checked = false;
+
+  // Obtener HTML actual del DOM
+  let rawHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // Reemplazar bloque CFG con valores actuales hard-coded (sin localStorage)
+  const S = '/*CFG_START*/';
+  const E = '/*CFG_END*/';
+  const si = rawHTML.indexOf(S);
+  const ei = rawHTML.indexOf(E);
+  if (si >= 0 && ei > si) {
+    const hardCoded = S + '\nlet CFG=' + JSON.stringify(CFG) + ';\n' + E;
+    rawHTML = rawHTML.slice(0, si) + hardCoded + rawHTML.slice(ei + E.length);
+  }
+
+  // Descargar
+  const blob = new Blob([rawHTML], {type: 'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const slug = (CFG.c || 'encuesta').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-') || 'Chapter-NPS';
+  a.href = url; a.download = 'Chapter-NPS-' + slug + '.html';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 600);
+}
+
+
+function saveAdm(){
+  CFG={...CFG,...readForm()};svCFG(CFG);applyUI();closeAdmin();
+  /* Volver al inicio via JS (confiable en desktop donde se usa admin) */
+  document.getElementById('s0').checked=true;
+  window.scrollTo({top:0,behavior:'smooth'});
+  // Auto-descargar versión con config embebida
+  setTimeout(downloadConfigured, 200);
+}
+function applyUI(){
+  document.getElementById('en').textContent=CFG.n||'—';
+  document.getElementById('ep').textContent=(CFG.q||'Q2')+' '+(CFG.y||'2026');
+  buildDims();
+}
+
+/* ════ DIMENSIONES (CSS-only: radio+label pares) ════ */
+function buildDims(){
+  const dw=document.getElementById('dw');dw.innerHTML='';
+  const all=[...DIMS_BASE];
+  if(CFG.t1==='r'&&CFG.q1)all.push({k:'xr1',lbl:CFG.q1,lo:'Muy malo',hi:'Excelente'});
+  if(CFG.t2==='r'&&CFG.q2)all.push({k:'xr2',lbl:CFG.q2,lo:'Muy malo',hi:'Excelente'});
+  all.forEach(d=>{
+    const row=document.createElement('div');row.className='dr';
+    const ql=document.createElement('div');ql.className='ql';ql.textContent=d.lbl;
+    const btns=document.createElement('div');btns.className='dbr';
+    for(let i=1;i<=5;i++){
+      const rid='dim-'+d.k+'-'+i;
+      const r=document.createElement('input');
+      r.type='radio';r.name='dim-'+d.k;r.id=rid;r.value=i;r.className='hr';
+      const l=document.createElement('label');
+      l.htmlFor=rid;l.className='db';l.textContent=i;
+      btns.appendChild(r);btns.appendChild(l);
+    }
+    const da=document.createElement('div');da.className='da';da.innerHTML='<span>'+d.lo+'</span><span>'+d.hi+'</span>';
+    row.appendChild(ql);row.appendChild(btns);row.appendChild(da);dw.appendChild(row);
+  });
+  const xo1=document.getElementById('xo1'),xo2=document.getElementById('xo2');
+  if(CFG.t1==='o'&&CFG.q1){xo1.style.display='block';document.getElementById('xo1l').textContent=CFG.q1;}else xo1.style.display='none';
+  if(CFG.t2==='o'&&CFG.q2){xo2.style.display='block';document.getElementById('xo2l').textContent=CFG.q2;}else xo2.style.display='none';
+}
+
+/* ════ ENVÍO (mínimo JS, triggered por change en #stk) ════ */
+function getR(n){const el=document.querySelector('input[name="'+n+'"]:checked');return el?el.value:'--';}
+
+/* ═══ MÉTODOS DE ENVÍO — múltiples fallbacks ═══════════════════════════
+   1. navigator.sendBeacon + JSON  → cross-origin, file://, iOS, Android
+      → va a doPost como JSON (MISMO que el original que funcionó)
+   2. iframe form POST             → fallback desktop
+   Ninguno requiere re-deploy del Apps Script.
+═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══ ENVÍO DE DATOS ═══════════════════════════════════════════════════
+   Método 1: JSONP via <script> tag — sin CORS, funciona desde file://, iOS, Android
+   Método 2: sendBeacon text/plain — fallback  
+   Método 3: iframe form POST — último recurso
+════════════════════════════════════════════════════════════════════════ */
+async function sendData(url, data) {
+
+  /* ── Método 1: fetch JSON — Mac y Android (rápido, directo) ── */
+  try {
+    const r = await fetch(url, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (r.ok) { console.log('✓ fetch ok'); return; }
+  } catch(e) { /* iOS bloquea fetch cross-origin desde file://, continuar */ }
+
+  /* ── Método 2: Form GET via iframe — iOS Safari ──────────────
+     Los form submissions son navegaciones del browser, iOS no los bloquea.
+     El Apps Script doGet recibe los parámetros y guarda en Sheet.
+  ─────────────────────────────────────────────────────────────── */
+  try {
+    await new Promise(function(resolve) {
+      var frId = '_ios_frm_' + Date.now();
+      var fr = document.createElement('iframe');
+      fr.id = frId; fr.name = frId;
+      fr.style.cssText = 'display:none;position:absolute;top:-9999px;width:1px;height:1px;';
+      document.body.appendChild(fr);
+
+      var fm = document.createElement('form');
+      fm.method = 'GET';
+      fm.action = url;
+      fm.target  = frId;
+      fm.style.display = 'none';
+
+      Object.entries(data).forEach(function(kv) {
+        var i = document.createElement('input');
+        i.type = 'hidden';
+        i.name  = kv[0];
+        i.value = String(kv[1] === null || kv[1] === undefined ? '' : kv[1]).substring(0, 200);
+        fm.appendChild(i);
+      });
+      document.body.appendChild(fm);
+
+      var done = false;
+      fr.onload = function() {
+        if (!done) { done=true; setTimeout(function(){try{fm.remove();fr.remove();}catch(_){}},300); resolve(); }
+      };
+      fm.submit();
+      /* Timeout: aunque onload no dispare, el request ya salió */
+      setTimeout(function() {
+        if (!done) { done=true; try{fm.remove();}catch(_){} resolve(); }
+      }, 6000);
+    });
+    console.log('✓ Form GET (iOS) ok');
+    return;
+  } catch(e) { console.warn('Form GET:', e); }
+
+  /* ── Método 3: Image beacon — último recurso ── */
+  try {
+    var p = new URLSearchParams();
+    Object.entries(data).forEach(function(kv) {
+      p.set(kv[0], String(kv[1] === null || kv[1] === undefined ? '' : kv[1]).substring(0,200));
+    });
+    await new Promise(function(resolve) {
+      var img = new Image();
+      img.onload = img.onerror = function() { resolve(); };
+      img.src = url + '?' + p.toString();
+      setTimeout(resolve, 8000);
+    });
+    console.log('✓ Beacon ok');
+    return;
+  } catch(e) {}
+
+  /* ── Método 4: sendBeacon text/plain ── */
+  try {
+    if (navigator.sendBeacon) {
+      var b = new Blob([JSON.stringify(data)], {type:'text/plain'});
+      if (navigator.sendBeacon(url, b)) { console.log('✓ sendBeacon ok'); return; }
+    }
+  } catch(e) {}
+
+  console.error('Todos los métodos de envío fallaron');
+}
+
+
+let _sent=false;
+async function sendSurveyData(){
+  if(_sent)return;_sent=true;
+  const per=(CFG.q||'Q2')+' '+(CFG.y||'2026');
+  const pd={
+    cliente:CFG.c||'—',contacto:CFG.n||'—',periodo:per,
+    nps:getR('nps'),csat:getR('csat'),
+    dim_comunicacion:getR('dim-comunicacion'),dim_resultados:getR('dim-resultados'),
+    dim_reportes:getR('dim-reportes'),dim_creatividades:getR('dim-creatividades'),
+    dim_velocidad:getR('dim-velocidad'),
+    texto_mejoras:(document.getElementById('tm')||{}).value||'',
+    texto_valora:(document.getElementById('tv')||{}).value||''
+  };
+  if(CFG.t1&&CFG.q1){pd.extra1_pregunta=CFG.q1;if(CFG.t1==='r')pd.extra1_valor=getR('dim-xr1');else pd.extra1_texto=(document.getElementById('te1')||{}).value||'';}
+  if(CFG.t2&&CFG.q2){pd.extra2_pregunta=CFG.q2;if(CFG.t2==='r')pd.extra2_valor=getR('dim-xr2');else pd.extra2_texto=(document.getElementById('te2')||{}).value||'';}
+  const url=CFG.f||'';
+  if(!url||url===''||url.includes('XXXXX')){return;} /* modo demo: CSS ya mostró gracias */
+  /* Enviar datos — múltiples métodos con fallback automático */
+  sendData(url, pd);
+}
+
+/* ════ DESCARGAR HTML PARA CLIENTE ════ */
+function dlClient(){
+  const nc={...CFG,...readForm()};
+  const per=nc.q+' '+nc.y;
+  const blob=new Blob([genHTML(nc,per)],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const slug=(nc.c||'cliente').replace(/[^a-zA-ZÀ-ɏ0-9 ]/g,'').trim().replace(/\s+/g,'-');
+  a.href=url;a.download='Chapter-NPS-'+slug+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function jsEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+
+function genHTML(c,per){
+  const allDims=[
+    {k:'comunicacion',lbl:'Comunicación',lo:'Muy mala',hi:'Excelente'},
+    {k:'resultados',lbl:'Resultados de campañas',lo:'Muy malos',hi:'Excelentes'},
+    {k:'reportes',lbl:'Reportes mensuales',lo:'Muy malos',hi:'Excelentes'},
+    {k:'creatividades',lbl:'Creatividades y contenido',lo:'Muy malas',hi:'Excelentes'},
+    {k:'velocidad',lbl:'Velocidad de respuesta',lo:'Muy lenta',hi:'Excelente'},
+  ];
+  if(c.t1==='r'&&c.q1)allDims.push({k:'xr1',lbl:c.q1,lo:'Muy malo',hi:'Excelente'});
+  if(c.t2==='r'&&c.q2)allDims.push({k:'xr2',lbl:c.q2,lo:'Muy malo',hi:'Excelente'});
+
+  const dimsHtml=allDims.map(d=>
+    '<div class="dr"><div class="ql">'+esc(d.lbl)+'</div><div class="dbr">'+
+    [1,2,3,4,5].map(i=>'<input type="radio" name="dim-'+d.k+'" id="d'+d.k+i+'" value="'+i+'" class="hr"><label for="d'+d.k+i+'" class="db">'+i+'</label>').join('')+
+    '</div><div class="da"><span>'+esc(d.lo)+'</span><span>'+esc(d.hi)+'</span></div></div>'
+  ).join('');
+
+  const xo1h=(c.t1==='o'&&c.q1)?'<div class="ob"><div class="ql">'+esc(c.q1)+'</div><textarea class="ti" id="te1" placeholder="Tu respuesta..."></textarea></div>':'';
+  const xo2h=(c.t2==='o'&&c.q2)?'<div class="ob"><div class="ql">'+esc(c.q2)+'</div><textarea class="ti" id="te2" placeholder="Tu respuesta..."></textarea></div>':'';
+  const xpay=[];
+  if(c.t1&&c.q1){if(c.t1==='r')xpay.push("pd.extra1_valor=getR('dim-xr1');");else xpay.push("pd.extra1_texto=(document.getElementById('te1')||{}).value||'';");xpay.push("pd.extra1_pregunta='"+jsEsc(c.q1)+"';")}
+  if(c.t2&&c.q2){if(c.t2==='r')xpay.push("pd.extra2_valor=getR('dim-xr2');");else xpay.push("pd.extra2_texto=(document.getElementById('te2')||{}).value||'';");xpay.push("pd.extra2_pregunta='"+jsEsc(c.q2)+"';")}
+
+  return`<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Encuesta · ${esc(c.c||'Chapter')}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--pl:#756977;--pld:#5A5060;--plx:#F0EDF0;--ln:#F7F5F3;--eb:#2A2329;--sl:#AFA8AE;--bd:#E8E4E7;--wh:#FFFFFF;--ok:#4A7C59;--re:#C0392B;--am:#D4891A;--rsm:8px;--ez:.18s cubic-bezier(.4,0,.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--ln);color:var(--eb);min-height:100vh;padding:32px 16px 56px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:600px}.la{display:flex;flex-direction:column;align-items:center;margin-bottom:28px}
+.lc{width:54px;height:54px;background:var(--pl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:9px}
+.lch{font-family:'Barlow Condensed','Arial Black',sans-serif;font-weight:700;font-size:18px;color:#fff;letter-spacing:.5px;line-height:1}
+.ls{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--pl);text-transform:uppercase}
+.hr{display:none}.sec{display:none}
+#s0:checked~.wrap #sec0{display:block}#s1:checked~.wrap #sec1{display:block}
+#s2:checked~.wrap #sec2{display:block}#s3:checked~.wrap #sec3{display:block}
+#s4:checked~.wrap #sec4{display:block}#stk:checked~.wrap #sectk{display:block}
+.pg{display:none;margin-bottom:22px}
+#s1:checked~.wrap .pg,#s2:checked~.wrap .pg,#s3:checked~.wrap .pg,#s4:checked~.wrap .pg{display:block}
+.pgl{display:flex;gap:5px;margin-bottom:6px}.pgi{flex:1;height:2px;border-radius:1px;background:var(--bd)}
+#s1:checked~.wrap #pi1,#s2:checked~.wrap #pi1,#s2:checked~.wrap #pi2,
+#s3:checked~.wrap #pi1,#s3:checked~.wrap #pi2,#s3:checked~.wrap #pi3,
+#s4:checked~.wrap #pi1,#s4:checked~.wrap #pi2,#s4:checked~.wrap #pi3,#s4:checked~.wrap #pi4{background:var(--pl)}
+.pgm{display:flex;justify-content:space-between;font-size:12px;color:var(--sl);font-weight:500}
+.pg1,.pg2,.pg3,.pg4{display:none}
+#s1:checked~.wrap .pg1{display:inline}#s2:checked~.wrap .pg2{display:inline}
+#s3:checked~.wrap .pg3{display:inline}#s4:checked~.wrap .pg4{display:inline}
+.card{background:var(--wh);border-radius:14px;border:1px solid var(--bd);overflow:hidden}.cb{padding:40px}
+.ey{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pl);margin-bottom:6px}
+.st{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.15;color:var(--eb);margin-bottom:8px}
+.sd{font-size:15px;color:var(--sl);line-height:1.55}.ql{font-size:14px;font-weight:600;color:var(--eb);margin-bottom:10px}
+.dv{height:1px;background:var(--bd);margin:26px 0}
+.ng{display:grid;grid-template-columns:repeat(11,1fr);gap:5px}
+.nb{display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bd);border-radius:var(--rsm);background:var(--wh);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--sl);cursor:pointer;aspect-ratio:1;transition:all var(--ez);-webkit-tap-highlight-color:transparent}
+.nb:hover{border-color:var(--pl);color:var(--pl)}
+#nps-0:checked+.nb,#nps-1:checked+.nb,#nps-2:checked+.nb,#nps-3:checked+.nb,#nps-4:checked+.nb,#nps-5:checked+.nb,#nps-6:checked+.nb{background:var(--re);border-color:var(--re);color:#fff}
+#nps-7:checked+.nb,#nps-8:checked+.nb{background:var(--am);border-color:var(--am);color:#fff}
+#nps-9:checked+.nb,#nps-10:checked+.nb{background:var(--ok);border-color:var(--ok);color:#fff}
+.nax{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--sl)}
+.sr{display:flex;gap:4px;margin-top:4px}.sb{font-size:38px;color:var(--bd);cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent;transition:color var(--ez)}
+#cs1:checked~.sr label[for="cs1"]{color:var(--pl)}
+#cs2:checked~.sr label[for="cs1"],#cs2:checked~.sr label[for="cs2"]{color:var(--pl)}
+#cs3:checked~.sr label[for="cs1"],#cs3:checked~.sr label[for="cs2"],#cs3:checked~.sr label[for="cs3"]{color:var(--pl)}
+#cs4:checked~.sr label[for="cs1"],#cs4:checked~.sr label[for="cs2"],#cs4:checked~.sr label[for="cs3"],#cs4:checked~.sr label[for="cs4"]{color:var(--pl)}
+#cs5:checked~.sr label{color:var(--pl)}
+.cl{font-size:14px;color:var(--pl);margin-top:10px;min-height:18px;font-weight:500}.clt{display:none}
+#cs1:checked~.cl .clt:nth-child(1){display:inline}#cs2:checked~.cl .clt:nth-child(2){display:inline}
+#cs3:checked~.cl .clt:nth-child(3){display:inline}#cs4:checked~.cl .clt:nth-child(4){display:inline}
+#cs5:checked~.cl .clt:nth-child(5){display:inline}
+.dr{padding:18px 0;border-bottom:1px solid var(--bd)}.dr:first-child{padding-top:0}.dr:last-child{border-bottom:none;padding-bottom:0}
+.dbr{display:flex;gap:8px;margin-top:10px}.db{width:44px;height:44px;border:1.5px solid var(--bd);border-radius:var(--rsm);background:var(--wh);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--sl);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--ez);-webkit-tap-highlight-color:transparent}
+.db:hover{border-color:var(--pl);color:var(--pl)}.hr:checked+.db{background:var(--pl);border-color:var(--pl);color:#fff}
+.da{display:flex;justify-content:space-between;font-size:11px;color:var(--sl);margin-top:6px;max-width:240px}
+.ob{margin-bottom:22px}textarea.ti{width:100%;border:1.5px solid var(--bd);border-radius:var(--rsm);padding:13px 15px;font-family:'Inter',sans-serif;font-size:14px;color:var(--eb);background:var(--wh);resize:vertical;min-height:88px;outline:none;transition:border-color var(--ez);margin-top:8px;line-height:1.5}
+textarea.ti:focus{border-color:var(--pl)}textarea.ti::placeholder{color:var(--sl)}
+.nv{display:flex;justify-content:space-between;align-items:center;margin-top:32px;gap:12px}
+.bk{background:none;color:var(--sl);border:1.5px solid var(--bd);border-radius:var(--rsm);padding:12px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;-webkit-tap-highlight-color:transparent;transition:all var(--ez)}.bk:hover{border-color:var(--pl);color:var(--pl)}
+.bn{background:var(--pl);color:#fff;border:none;border-radius:var(--rsm);padding:13px 24px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:background var(--ez)}.bn:hover{background:var(--pld)}
+.ib{text-align:center;padding:52px 40px}.pill{display:inline-flex;align-items:center;gap:5px;background:var(--plx);color:var(--pl);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;margin-bottom:22px}
+.in{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:38px;color:var(--eb);margin-bottom:12px;line-height:1.1}.it{font-size:15px;color:var(--sl);line-height:1.65;margin-bottom:32px}
+.tb{text-align:center;padding:60px 40px}.ck{width:64px;height:64px;background:var(--ok);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px}
+.tt{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:36px;color:var(--eb);margin-bottom:10px}.tx{font-size:15px;color:var(--sl);line-height:1.65}
+.ft{text-align:center;margin-top:18px;font-size:12px;color:var(--sl)}
+@media(max-width:480px){body{padding:20px 12px 44px}.cb{padding:28px 20px}.ib,.tb{padding:40px 20px}.nb{font-size:13px}.ng{gap:3px}.st{font-size:26px}.sb{font-size:30px}.db{width:40px;height:40px;font-size:15px}}
+</style></head>
+<body>
+<input type="radio" name="step" id="s0" class="hr" checked>
+<input type="radio" name="step" id="s1" class="hr">
+<input type="radio" name="step" id="s2" class="hr">
+<input type="radio" name="step" id="s3" class="hr">
+<input type="radio" name="step" id="s4" class="hr">
+<input type="radio" name="step" id="stk" class="hr">
+<div class="wrap">
+<div class="la"><div class="lc"><span class="lch">CH</span></div><span class="ls">Chapter&#8482;</span></div>
+<div class="pg"><div class="pgl"><div class="pgi" id="pi1"></div><div class="pgi" id="pi2"></div><div class="pgi" id="pi3"></div><div class="pgi" id="pi4"></div></div><div class="pgm"><span><span class="pg1">Paso 1 de 4</span><span class="pg2">Paso 2 de 4</span><span class="pg3">Paso 3 de 4</span><span class="pg4">Paso 4 de 4</span></span><span><span class="pg1">25%</span><span class="pg2">50%</span><span class="pg3">75%</span><span class="pg4">100%</span></span></div></div>
+<div class="sec" id="sec0"><div class="card"><div class="ib"><div class="pill">&#9201; Menos de 3 minutos</div><div class="in">Hola, ${esc(c.n||'estimado cliente')}</div><p class="it">Queremos seguir siendo la mejor agencia para tu negocio.<br>Tu opini&#243;n nos ayuda a mejorar cada trimestre.<br>Esta encuesta es completamente confidencial.</p><label for="s1" class="bn" style="margin:0 auto;">Comenzar &nbsp;&#8594;</label></div></div></div>
+<div class="sec" id="sec1"><div class="card"><div class="cb"><div class="ey">1 de 4 &middot; Recomendaci&#243;n</div><h2 class="st">&#191;Nos recomendar&#237;as?</h2><p class="sd">En una escala del 0 al 10, &#191;qu&#233; tan probable es que recomiendes Chapter a otro negocio?</p><div class="dv"></div><div class="ng"><input type="radio" name="nps" id="nps-0" value="0" class="hr"><label for="nps-0" class="nb">0</label><input type="radio" name="nps" id="nps-1" value="1" class="hr"><label for="nps-1" class="nb">1</label><input type="radio" name="nps" id="nps-2" value="2" class="hr"><label for="nps-2" class="nb">2</label><input type="radio" name="nps" id="nps-3" value="3" class="hr"><label for="nps-3" class="nb">3</label><input type="radio" name="nps" id="nps-4" value="4" class="hr"><label for="nps-4" class="nb">4</label><input type="radio" name="nps" id="nps-5" value="5" class="hr"><label for="nps-5" class="nb">5</label><input type="radio" name="nps" id="nps-6" value="6" class="hr"><label for="nps-6" class="nb">6</label><input type="radio" name="nps" id="nps-7" value="7" class="hr"><label for="nps-7" class="nb">7</label><input type="radio" name="nps" id="nps-8" value="8" class="hr"><label for="nps-8" class="nb">8</label><input type="radio" name="nps" id="nps-9" value="9" class="hr"><label for="nps-9" class="nb">9</label><input type="radio" name="nps" id="nps-10" value="10" class="hr"><label for="nps-10" class="nb">10</label></div><div class="nax"><span>Nada probable</span><span>Muy probable</span></div><div class="nv"><label for="s0" class="bk">&#8592; Atr&#225;s</label><label for="s2" class="bn">Continuar &#8594;</label></div></div></div></div>
+<div class="sec" id="sec2"><div class="card"><div class="cb"><div class="ey">2 de 4 &middot; Satisfacci&#243;n general</div><h2 class="st">&#191;Qu&#233; tal lo hemos hecho?</h2><p class="sd">&#191;C&#243;mo calificar&#237;as tu experiencia general con Chapter en este trimestre?</p><div class="dv"></div><input type="radio" name="csat" id="cs5" value="5" class="hr"><input type="radio" name="csat" id="cs4" value="4" class="hr"><input type="radio" name="csat" id="cs3" value="3" class="hr"><input type="radio" name="csat" id="cs2" value="2" class="hr"><input type="radio" name="csat" id="cs1" value="1" class="hr"><div class="sr"><label for="cs1" class="sb">&#9733;</label><label for="cs2" class="sb">&#9733;</label><label for="cs3" class="sb">&#9733;</label><label for="cs4" class="sb">&#9733;</label><label for="cs5" class="sb">&#9733;</label></div><div class="cl"><span class="clt">Muy insatisfecho</span><span class="clt">Insatisfecho</span><span class="clt">Regular</span><span class="clt">Satisfecho</span><span class="clt">Muy satisfecho</span></div><div class="nv"><label for="s1" class="bk">&#8592; Atr&#225;s</label><label for="s3" class="bn">Continuar &#8594;</label></div></div></div></div>
+<div class="sec" id="sec3"><div class="card"><div class="cb"><div class="ey">3 de 4 &middot; Nuestro trabajo</div><h2 class="st">Eval&#250;a cada &#225;rea</h2><p class="sd">Califica del 1 (muy malo) al 5 (excelente).</p><div class="dv"></div>${dimsHtml}<div class="nv"><label for="s2" class="bk">&#8592; Atr&#225;s</label><label for="s4" class="bn">Continuar &#8594;</label></div></div></div></div>
+<div class="sec" id="sec4"><div class="card"><div class="cb"><div class="ey">4 de 4 &middot; Tu voz</div><h2 class="st">Cu&#233;ntanos m&#225;s</h2><p class="sd">Opcional, pero muy valioso para nosotros.</p><div class="dv"></div><div class="ob"><div class="ql">&#191;Qu&#233; podr&#237;amos hacer mejor?</div><textarea class="ti" id="tm" placeholder="Cu&#233;ntanos en qu&#233; podemos mejorar..."></textarea></div><div class="ob"><div class="ql">&#191;Qu&#233; es lo que m&#225;s valoras de trabajar con nosotros?</div><textarea class="ti" id="tv" placeholder="Lo que m&#225;s te gusta de nuestra relaci&#243;n..."></textarea></div>${xo1h}${xo2h}<div class="nv"><label for="s3" class="bk">&#8592; Atr&#225;s</label><label for="stk" class="bn">Enviar encuesta &#10003;</label></div></div></div></div>
+<div class="sec" id="sectk"><div class="card"><div class="tb"><div class="ck"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14L11 19.5L22 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tt">&#161;Muchas gracias!</div><p class="tx">Tu opini&#243;n llega directamente al equipo de Chapter.<br>Nos comprometemos a mejorar cada trimestre para ti.</p></div></div></div>
+<div class="ft">Encuesta de satisfacci&#243;n trimestral &middot; Chapter&#8482; &middot; ${per}</div>
+</div>
+<script>
+const FSP='${jsEsc(c.f||'')}';
+function getR(n){const el=document.querySelector('input[name="'+n+'"]:checked');return el?el.value:'--';}
+function submitViaForm(u,d){return new Promise(res=>{const n='chf'+Date.now();const fr=document.createElement('iframe');fr.name=n;fr.style.cssText='display:none;position:absolute;top:-9999px';document.body.appendChild(fr);const fm=document.createElement('form');fm.method='POST';fm.action=u;fm.target=n;fm.style.display='none';Object.entries(d).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=String(v===null||v===undefined?'':v);fm.appendChild(i);});document.body.appendChild(fm);let ok=false;fm.submit();fr.onload=()=>{if(ok)return;ok=true;setTimeout(()=>{try{fm.remove();fr.remove();}catch(_){}},400);res();};setTimeout(()=>{if(!ok){ok=true;try{fm.remove();fr.remove();}catch(_){}res();}},4000);});}
+document.querySelectorAll('input[name="step"]').forEach(r=>{r.addEventListener('change',()=>window.scrollTo({top:0,behavior:'smooth'}));});
+document.getElementById('stk').addEventListener('change',async function(){
+  if(!this.checked)return;
+  const pd={cliente:'${jsEsc(c.c||'')}',contacto:'${jsEsc(c.n||'')}',periodo:'${per}',nps:getR('nps'),csat:getR('csat'),dim_comunicacion:getR('dim-comunicacion'),dim_resultados:getR('dim-resultados'),dim_reportes:getR('dim-reportes'),dim_creatividades:getR('dim-creatividades'),dim_velocidad:getR('dim-velocidad'),texto_mejoras:(document.getElementById('tm')||{}).value||'',texto_valora:(document.getElementById('tv')||{}).value||''};
+  ${xpay.join('; ')}
+  if(!FSP||FSP===''||FSP.includes('XXXXX'))return;
+  try{await submitViaBeacon(FSP,pd);}catch(_){}
+});
+<\/script>
+</body></html>`;
+}
+</script>
+
+</body></html>
