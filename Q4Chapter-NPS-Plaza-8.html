@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Encuesta · Chapter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+/* ── ADMIN ─────────────────────────────────────── */
+#adm-ov{display:none;position:fixed;inset:0;background:rgba(42,35,41,.7);z-index:9999;align-items:flex-start;justify-content:center;padding:20px 16px;overflow-y:auto}
+#adm-ov.open{display:flex}
+#adm-box{background:#fff;border-radius:16px;width:100%;max-width:580px;box-shadow:0 12px 40px rgba(0,0,0,.25);margin:auto}
+#adm-head{display:flex;align-items:center;justify-content:space-between;padding:20px 26px 16px;border-bottom:1px solid #E8E4E7;position:sticky;top:0;background:#fff;border-radius:16px 16px 0 0;z-index:1}
+#adm-head h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:#2A2329}
+#adm-x{background:none;border:none;font-size:22px;color:#AFA8AE;cursor:pointer;padding:2px 6px}
+#adm-x:hover{color:#2A2329}
+.ab{padding:20px 26px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:13px;font-weight:600;color:#2A2329;margin-bottom:5px}
+.fi,.fs{border:1.5px solid #E8E4E7;border-radius:8px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:14px;color:#2A2329;background:#fff;outline:none;transition:border-color .15s;width:100%}
+.fi:focus,.fs:focus{border-color:#756977}.fs{cursor:pointer}
+.frow{display:flex;gap:10px}.frow .fs{flex:1}
+.fhint{font-size:12px;color:#AFA8AE;margin-top:4px;line-height:1.5}
+.asec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#AFA8AE;padding-top:18px;margin:18px 0 12px;border-top:1px solid #E8E4E7;display:flex;align-items:center;justify-content:space-between}
+/* Question editor */
+.q-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.q-item{border:1.5px solid #E8E4E7;border-radius:10px;padding:12px 14px;background:#fff;transition:border-color .15s}
+.q-item:hover{border-color:#AFA8AE}
+.q-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.q-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:#756977;min-width:20px}
+.q-type-toggle{display:flex;border:1.5px solid #E8E4E7;border-radius:6px;overflow:hidden;flex-shrink:0}
+.q-type-btn{background:none;border:none;padding:5px 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#AFA8AE;cursor:pointer;transition:all .15s}
+.q-type-btn.active{background:#756977;color:#fff}
+.q-text-input{flex:1;border:1.5px solid #E8E4E7;border-radius:6px;padding:6px 10px;font-family:'Inter',sans-serif;font-size:13px;color:#2A2329;outline:none;resize:vertical;min-height:36px}
+.q-text-input:focus{border-color:#756977}
+.q-actions{display:flex;gap:4px;flex-shrink:0}
+.q-btn{background:none;border:1.5px solid #E8E4E7;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:12px;color:#AFA8AE;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.q-btn:hover{border-color:#756977;color:#756977}
+.q-btn.del:hover{border-color:#C0392B;color:#C0392B}
+.add-q-btn{width:100%;background:none;border:1.5px dashed #E8E4E7;border-radius:8px;padding:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#AFA8AE;cursor:pointer;transition:all .15s}
+.add-q-btn:hover{border-color:#756977;color:#756977}
+/* Admin footer */
+#adm-foot{display:flex;gap:10px;flex-wrap:wrap;padding:16px 26px 22px;border-top:1px solid #E8E4E7}
+.adl{flex:1;background:none;border:1.5px solid #E8E4E7;border-radius:8px;padding:10px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#756977;cursor:pointer;transition:all .15s;text-align:center}
+.adl:hover{border-color:#756977;background:#F0EDF0}
+.ads{flex:2;background:#756977;border:none;border-radius:8px;padding:11px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:background .15s}
+.ads:hover{background:#5A5060}
+#test-res{display:none;padding:10px 14px;border-radius:8px;font-size:13px;text-align:center;margin:0 26px 12px}
+
+/* ── SURVEY ─────────────────────────────────────── */
+:root{--pl:#756977;--pld:#5A5060;--plx:#F0EDF0;--ln:#F7F5F3;--eb:#2A2329;--sl:#AFA8AE;--bd:#E8E4E7;--wh:#FFFFFF;--ok:#4A7C59;--rsm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--ln);color:var(--eb);min-height:100vh;padding:32px 16px 56px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:600px}
+.la{display:flex;flex-direction:column;align-items:center;margin-bottom:28px}
+.lc{width:54px;height:54px;background:var(--pl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:9px;cursor:default;user-select:none}
+.lch{font-family:'Barlow Condensed','Arial Black',sans-serif;font-weight:700;font-size:18px;color:#fff;letter-spacing:.5px;line-height:1}
+.ls{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;color:var(--pl);text-transform:uppercase}
+/* Progress */
+.pg{display:none;margin-bottom:22px}.pg.on{display:block}
+.pgl{display:flex;gap:5px;margin-bottom:6px}
+.pgi{flex:1;height:2px;border-radius:1px;background:var(--bd);transition:background .3s}.pgi.dn{background:var(--pl)}
+.pgm{display:flex;justify-content:space-between;font-size:12px;color:var(--sl);font-weight:500}
+/* Card */
+.card{background:var(--wh);border-radius:14px;border:1px solid var(--bd);overflow:hidden}.cb{padding:40px}
+.sec{display:none}.sec.on{display:block}
+.ey{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--pl);margin-bottom:6px}
+.st{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1.15;color:var(--eb);margin-bottom:8px}
+.sd{font-size:15px;color:var(--sl);line-height:1.55}
+.ql{font-size:15px;font-weight:600;color:var(--eb);margin-bottom:14px;line-height:1.4}
+.dv{height:1px;background:var(--bd);margin:22px 0}
+/* Rating buttons */
+.rating-row{display:flex;gap:8px;margin-bottom:10px}
+.rb{width:52px;height:52px;border:1.5px solid var(--bd);border-radius:var(--rsm);background:var(--wh);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;color:var(--sl);transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.rb:hover{border-color:var(--pl);color:var(--pl)}
+.rb.sel{background:var(--pl);border-color:var(--pl);color:#fff}
+.rating-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--sl);max-width:280px}
+/* Open text */
+.ob{margin-bottom:20px}
+textarea.ti{width:100%;border:1.5px solid var(--bd);border-radius:var(--rsm);padding:13px 15px;font-family:'Inter',sans-serif;font-size:14px;color:var(--eb);background:var(--wh);resize:vertical;min-height:88px;outline:none;transition:border-color .15s;margin-top:8px;line-height:1.5}
+textarea.ti:focus{border-color:var(--pl)}
+textarea.ti::placeholder{color:var(--sl)}
+/* Nav buttons */
+.nv{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+.bk{background:none;color:var(--sl);border:1.5px solid var(--bd);border-radius:var(--rsm);padding:12px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.bk:hover{border-color:var(--pl);color:var(--pl)}
+.bn{background:var(--pl);color:#fff;border:none;border-radius:var(--rsm);padding:13px 24px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.bn:hover:not(:disabled){background:var(--pld)}.bn:disabled{opacity:.5;cursor:not-allowed}
+/* Intro */
+.ib{text-align:center;padding:52px 40px}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--plx);color:var(--pl);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;margin-bottom:22px}
+.in{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:38px;color:var(--eb);margin-bottom:12px;line-height:1.1}
+.it{font-size:15px;color:var(--sl);line-height:1.65;margin-bottom:32px}
+/* Thanks */
+.tb{text-align:center;padding:56px 40px}
+.ck{width:64px;height:64px;background:var(--ok);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px}
+.tt{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:36px;color:var(--eb);margin-bottom:10px}
+.tx{font-size:15px;color:var(--sl);line-height:1.65}
+/* Footer */
+.ft{text-align:center;margin-top:18px;font-size:12px;color:var(--sl)}
+.at{color:#d4cfd3;cursor:pointer;transition:color .15s}.at:hover{color:var(--pl)}
+@media(max-width:480px){body{padding:20px 12px 44px}.cb{padding:28px 20px}.ib,.tb{padding:36px 20px}.rb{width:44px;height:44px;font-size:17px}}
+</style>
+</head>
+<body>
+
+<!-- ══ PANEL ADMIN ══════════════════════════════════════════ -->
+<!-- ══ ENCUESTA ══════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="la">
+    <div class="lc" id="logo"><span class="lch">CH</span></div>
+    <span class="ls">Chapter™</span>
+  </div>
+  <!-- Progress -->
+  <div class="pg" id="pg">
+    <div class="pgl" id="pgl"><div class="pgi"></div><div class="pgi"></div><div class="pgi"></div><div class="pgi"></div><div class="pgi"></div><div class="pgi"></div><div class="pgi"></div></div>
+    <div class="pgm"><span id="pll">Paso 1</span><span id="ppc">0%</span></div>
+  </div>
+  <!-- Screens are injected here -->
+  <div id="survey-wrap"><div class="sec on" id="sec-0"><div class="card"><div class="ib">
+    <div class="pill">⏱ Menos de 3 minutos</div>
+    <div class="in">Hola, Martín y Jessi</div>
+    <p class="it">Queremos seguir siendo la mejor agencia para tu negocio.<br>Tu opinión nos ayuda a mejorar cada trimestre.<br>Esta encuesta es completamente confidencial.</p>
+    <button class="bn" onclick="goStep(1)" style="margin:0 auto;display:flex;">Comenzar &nbsp;→</button>
+  </div></div></div><div class="sec" id="sec-1"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 1 de 7</div>
+      <div class="ql">¿Qué tan satisfecho estás con la claridad, proactividad y tiempo de respuesta de tu ejecutiva de cuenta / community manager?</div>
+      <div class="rating-row" id="rr-ejecutiva">
+        <button class="rb" id="rb-ejecutiva-1" onclick="pickRating('ejecutiva',1)">1</button><button class="rb" id="rb-ejecutiva-2" onclick="pickRating('ejecutiva',2)">2</button><button class="rb" id="rb-ejecutiva-3" onclick="pickRating('ejecutiva',3)">3</button><button class="rb" id="rb-ejecutiva-4" onclick="pickRating('ejecutiva',4)">4</button><button class="rb" id="rb-ejecutiva-5" onclick="pickRating('ejecutiva',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(0)">← Atrás</button>
+        <button class="bn" onclick="goStep(2)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-2"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 2 de 7</div>
+      <div class="ql">¿Qué tan satisfecho estás con el diseño, la creatividad y coherencia de las piezas gráficas con tu marca?</div>
+      <div class="rating-row" id="rr-diseno">
+        <button class="rb" id="rb-diseno-1" onclick="pickRating('diseno',1)">1</button><button class="rb" id="rb-diseno-2" onclick="pickRating('diseno',2)">2</button><button class="rb" id="rb-diseno-3" onclick="pickRating('diseno',3)">3</button><button class="rb" id="rb-diseno-4" onclick="pickRating('diseno',4)">4</button><button class="rb" id="rb-diseno-5" onclick="pickRating('diseno',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(1)">← Atrás</button>
+        <button class="bn" onclick="goStep(3)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-3"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 3 de 7</div>
+      <div class="ql">¿Cómo evalúas la calidad técnica (iluminación, audio, edición) y el concepto de los videos creados?</div>
+      <div class="rating-row" id="rr-video">
+        <button class="rb" id="rb-video-1" onclick="pickRating('video',1)">1</button><button class="rb" id="rb-video-2" onclick="pickRating('video',2)">2</button><button class="rb" id="rb-video-3" onclick="pickRating('video',3)">3</button><button class="rb" id="rb-video-4" onclick="pickRating('video',4)">4</button><button class="rb" id="rb-video-5" onclick="pickRating('video',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(2)">← Atrás</button>
+        <button class="bn" onclick="goStep(4)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-4"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 4 de 7</div>
+      <div class="ql">¿Qué tan satisfecho estás con el rendimiento, optimización y los resultados de tus campañas publicitarias (ads/pauta)?</div>
+      <div class="rating-row" id="rr-ads">
+        <button class="rb" id="rb-ads-1" onclick="pickRating('ads',1)">1</button><button class="rb" id="rb-ads-2" onclick="pickRating('ads',2)">2</button><button class="rb" id="rb-ads-3" onclick="pickRating('ads',3)">3</button><button class="rb" id="rb-ads-4" onclick="pickRating('ads',4)">4</button><button class="rb" id="rb-ads-5" onclick="pickRating('ads',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(3)">← Atrás</button>
+        <button class="bn" onclick="goStep(5)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-5"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 5 de 7</div>
+      <div class="ql">¿Cómo calificas el cumplimiento de los tiempos de entrega y cronogramas de publicación pactados?</div>
+      <div class="rating-row" id="rr-tiempos">
+        <button class="rb" id="rb-tiempos-1" onclick="pickRating('tiempos',1)">1</button><button class="rb" id="rb-tiempos-2" onclick="pickRating('tiempos',2)">2</button><button class="rb" id="rb-tiempos-3" onclick="pickRating('tiempos',3)">3</button><button class="rb" id="rb-tiempos-4" onclick="pickRating('tiempos',4)">4</button><button class="rb" id="rb-tiempos-5" onclick="pickRating('tiempos',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(4)">← Atrás</button>
+        <button class="bn" onclick="goStep(6)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-6"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 6 de 7</div>
+      <div class="ql">En términos generales, ¿cuál es tu nivel de satisfacción trabajando con nuestro equipo?</div>
+      <div class="rating-row" id="rr-satisfaccion">
+        <button class="rb" id="rb-satisfaccion-1" onclick="pickRating('satisfaccion',1)">1</button><button class="rb" id="rb-satisfaccion-2" onclick="pickRating('satisfaccion',2)">2</button><button class="rb" id="rb-satisfaccion-3" onclick="pickRating('satisfaccion',3)">3</button><button class="rb" id="rb-satisfaccion-4" onclick="pickRating('satisfaccion',4)">4</button><button class="rb" id="rb-satisfaccion-5" onclick="pickRating('satisfaccion',5)">5</button>
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(5)">← Atrás</button>
+        <button class="bn" onclick="goStep(7)">Continuar →</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-7"><div class="card"><div class="cb">
+      <div class="ey">Pregunta 7 de 7</div>
+      <h2 class="st">Cuéntanos más</h2>
+      <p class="sd" style="margin-bottom:20px">Opcional, pero muy valioso para nosotros.</p>
+      <div class="ob">
+        <div class="ql">¿Qué es lo que más valoras del trabajo de la agencia?</div>
+        <textarea class="ti" id="ta-valora" placeholder="Tu respuesta..."></textarea>
+      </div><div class="ob">
+        <div class="ql">¿Qué oportunidad de mejora o sugerencia nos dejarías para seguir elevando la calidad de nuestro servicio?</div>
+        <textarea class="ti" id="ta-mejora" placeholder="Tu respuesta..."></textarea>
+      </div>
+      <div class="nv">
+        <button class="bk" onclick="goStep(6)">← Atrás</button>
+        <button class="bn" onclick="submitSurvey()">Enviar encuesta ✓</button>
+      </div>
+    </div></div></div><div class="sec" id="sec-thanks"><div class="card"><div class="tb">
+    <div class="ck"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14L11 19.5L22 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+    <div class="tt">¡Muchas gracias!</div>
+    <p class="tx">Tu opinión llega directamente al equipo de Chapter.<br>Nos comprometemos a mejorar cada trimestre para ti.</p>
+  </div></div></div></div>
+  <div class="ft">Encuesta de satisfacción · Chapter™ · <span id="ep">Q4 2026</span>
+  &nbsp;·&nbsp;<button onclick="openAdm()" style="background:none;border:none;color:#d4cfd3;cursor:pointer;font-size:12px;font-family:inherit;padding:0;">⚙ Admin</button>
+</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONFIGURACIÓN — embebida en el HTML al guardar
+════════════════════════════════════════════════════ */
+/*CFG_START*/
+let CFG={"c":"Plaza 8","n":"Martín y Jessi","q":"Q4","y":"2026","f":"https://script.google.com/macros/s/AKfycbw_98xh1phvRMo76F7OX1CFl36xbOecNgxlI9RnbFOuMOS3kc8LUUr3kXEw4CYZ3LrSHA/exec","questions":[{"key":"ejecutiva","label":"¿Qué tan satisfecho estás con la claridad, proactividad y tiempo de respuesta de tu ejecutiva de cuenta / community manager?","type":"rating"},{"key":"diseno","label":"¿Qué tan satisfecho estás con el diseño, la creatividad y coherencia de las piezas gráficas con tu marca?","type":"rating"},{"key":"video","label":"¿Cómo evalúas la calidad técnica (iluminación, audio, edición) y el concepto de los videos creados?","type":"rating"},{"key":"ads","label":"¿Qué tan satisfecho estás con el rendimiento, optimización y los resultados de tus campañas publicitarias (ads/pauta)?","type":"rating"},{"key":"tiempos","label":"¿Cómo calificas el cumplimiento de los tiempos de entrega y cronogramas de publicación pactados?","type":"rating"},{"key":"satisfaccion","label":"En términos generales, ¿cuál es tu nivel de satisfacción trabajando con nuestro equipo?","type":"rating"},{"key":"valora","label":"¿Qué es lo que más valoras del trabajo de la agencia?","type":"text"},{"key":"mejora","label":"¿Qué oportunidad de mejora o sugerencia nos dejarías para seguir elevando la calidad de nuestro servicio?","type":"text"}]};
+/*CFG_END*/
+
+/* ════ ESTADO ════ */
+let step = 0;        // 0 = intro, 1..N = questions, N+1 = thanks
+let answers = {};    // {key: value}
+let totalSteps = 0;  // set on render
+let submitted = false;
+
+/* ════ INICIALIZAR ════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Logo triple clic → admin
+  let lc=0,lt;
+  document.getElementById('logo').addEventListener('click',()=>{
+    lc++;clearTimeout(lt);
+    if(lc>=3){lc=0;openAdm();}
+    else lt=setTimeout(()=>{lc=0;},700);
+  });
+
+  applyUI(); // Renderizar encuesta siempre
+  if(!CFG.c){setTimeout(openAdm,200);}
+});
+
+/* ════ SURVEY RENDER ════ */
+function applyUI(){
+  document.getElementById('ep').textContent = (CFG.q||'Q4')+' '+(CFG.y||'2026');
+  renderSurvey();
+}
+
+function renderSurvey(){
+  const qs = CFG.questions || [];
+  const wrap = document.getElementById('survey-wrap');
+  wrap.innerHTML = '';
+  answers = {};
+
+  const ratingQs = qs.filter(q=>q.type==='rating');
+  const textQs   = qs.filter(q=>q.type==='text');
+
+  // Steps: 0=intro, 1..ratingQs.length = one per rating, ratingQs.length+1 = text block, last = thanks
+  totalSteps = ratingQs.length + (textQs.length>0?1:0);
+
+  // Progress bar
+  const pgl = document.getElementById('pgl');
+  pgl.innerHTML = Array.from({length:totalSteps},()=>'<div class="pgi"></div>').join('');
+
+  // Build HTML
+  let html = '';
+
+  // Intro
+  html += `<div class="sec on" id="sec-0"><div class="card"><div class="ib">
+    <div class="pill">⏱ Menos de 3 minutos</div>
+    <div class="in">Hola, ${esc(CFG.n||'—')}</div>
+    <p class="it">Queremos seguir siendo la mejor agencia para tu negocio.<br>Tu opinión nos ayuda a mejorar cada trimestre.<br>Esta encuesta es completamente confidencial.</p>
+    <button class="bn" onclick="goStep(1)" style="margin:0 auto;display:flex;">Comenzar &nbsp;→</button>
+  </div></div></div>`;
+
+  // Rating questions (one per screen)
+  ratingQs.forEach((q,i)=>{
+    const stepN = i+1;
+    const prev = i===0 ? 'goStep(0)' : `goStep(${stepN-1})`;
+    const next = stepN===ratingQs.length && textQs.length===0
+      ? `submitSurvey()`
+      : `goStep(${stepN+1})`;
+    const nextLabel = stepN===ratingQs.length && textQs.length===0 ? 'Enviar encuesta ✓' : 'Continuar →';
+    html += `<div class="sec" id="sec-${stepN}"><div class="card"><div class="cb">
+      <div class="ey">Pregunta ${stepN} de ${totalSteps}</div>
+      <div class="ql">${esc(q.label)}</div>
+      <div class="rating-row" id="rr-${q.key}">
+        ${[1,2,3,4,5].map(v=>`<button class="rb" id="rb-${q.key}-${v}" onclick="pickRating('${q.key}',${v})">${v}</button>`).join('')}
+      </div>
+      <div class="rating-labels"><span>Muy insatisfecho</span><span>Muy satisfecho</span></div>
+      <div class="nv">
+        <button class="bk" onclick="${prev}">← Atrás</button>
+        <button class="bn" onclick="${next}">${nextLabel}</button>
+      </div>
+    </div></div></div>`;
+  });
+
+  // Text questions (all together on one screen)
+  if(textQs.length>0){
+    const stepN = ratingQs.length+1;
+    const prev = ratingQs.length>0 ? `goStep(${ratingQs.length})` : 'goStep(0)';
+    html += `<div class="sec" id="sec-${stepN}"><div class="card"><div class="cb">
+      <div class="ey">${ratingQs.length>0 ? `Pregunta ${stepN} de ${totalSteps}` : 'Tu voz'}</div>
+      <h2 class="st">Cuéntanos más</h2>
+      <p class="sd" style="margin-bottom:20px">Opcional, pero muy valioso para nosotros.</p>
+      ${textQs.map(q=>`<div class="ob">
+        <div class="ql">${esc(q.label)}</div>
+        <textarea class="ti" id="ta-${q.key}" placeholder="Tu respuesta..."></textarea>
+      </div>`).join('')}
+      <div class="nv">
+        <button class="bk" onclick="${prev}">← Atrás</button>
+        <button class="bn" onclick="submitSurvey()">Enviar encuesta ✓</button>
+      </div>
+    </div></div></div>`;
+  }
+
+  // Thanks
+  html += `<div class="sec" id="sec-thanks"><div class="card"><div class="tb">
+    <div class="ck"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14L11 19.5L22 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="tt">¡Muchas gracias!</div>
+    <p class="tx">Tu opinión llega directamente al equipo de Chapter.<br>Nos comprometemos a mejorar cada trimestre para ti.</p>
+  </div></div></div>`;
+
+  wrap.innerHTML = html;
+  goStep(0);
+}
+
+function goStep(n){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  const pg = document.getElementById('pg');
+
+  if(n===0){
+    document.getElementById('sec-0').classList.add('on');
+    pg.classList.remove('on');
+  } else if(n==='thanks'){
+    document.getElementById('sec-thanks').classList.add('on');
+    pg.classList.remove('on');
+  } else {
+    const el = document.getElementById('sec-'+n);
+    if(el){ el.classList.add('on'); pg.classList.add('on'); updateProgress(n); }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+  step = n;
+}
+
+function updateProgress(n){
+  const bars = document.querySelectorAll('.pgi');
+  bars.forEach((b,i)=>b.className='pgi'+(i<n?' dn':''));
+  document.getElementById('pll').textContent = `Paso ${n} de ${totalSteps}`;
+  document.getElementById('ppc').textContent = Math.round(n/totalSteps*100)+'%';
+}
+
+function pickRating(key, val){
+  answers[key] = val;
+  for(let i=1;i<=5;i++){
+    const b = document.getElementById('rb-'+key+'-'+i);
+    if(b) b.className = 'rb'+(i===val?' sel':'');
+  }
+}
+
+/* ════ ENVÍO ════ */
+async function submitSurvey(){
+  if(submitted) return;
+
+  // Collect text answers
+  const qs = CFG.questions||[];
+  qs.filter(q=>q.type==='text').forEach(q=>{
+    const el = document.getElementById('ta-'+q.key);
+    if(el) answers[q.key] = el.value||'';
+  });
+
+  goStep('thanks');
+
+  const url = CFG.f||'';
+  if(!url||url.includes('XXXXX')) return;
+
+  submitted = true;
+  const per = (CFG.q||'Q4')+' '+(CFG.y||'2026');
+  const payload = {cliente:CFG.c||'—', contacto:CFG.n||'—', periodo:per};
+  qs.forEach(q=>{ payload[q.key] = answers[q.key]!==undefined ? answers[q.key] : ''; });
+
+  sendData(url, payload);
+}
+
+async function sendData(url, data){
+  // 1. fetch JSON (HTTPS / GitHub Pages)
+  try{
+    const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(r.ok){console.log('✓ fetch ok');return;}
+  }catch(e){console.warn('fetch:',e.message);}
+  // 2. Form GET via iframe (iOS fallback)
+  try{
+    const n='chf'+Date.now();
+    const fr=document.createElement('iframe');fr.name=n;fr.style.cssText='display:none;position:absolute;top:-9999px';document.body.appendChild(fr);
+    const fm=document.createElement('form');fm.method='GET';fm.action=url;fm.target=n;fm.style.display='none';
+    Object.entries(data).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=String(v||'');fm.appendChild(i);});
+    document.body.appendChild(fm);fm.submit();
+    setTimeout(()=>{try{fm.remove();fr.remove();}catch(_){}},4000);
+    console.log('✓ form GET ok');
+  }catch(e){}
+}
+
+/* ════ DESCARGAR ════ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function downloadConfigured(){
+  let h = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const S='/*CFG_START*/', E='/*CFG_END*/';
+  const si=h.indexOf(S), ei=h.indexOf(E);
+  if(si>=0&&ei>si){
+    h = h.slice(0,si) + S + '\nlet CFG=' + JSON.stringify(CFG) + ';\n' + E + h.slice(ei+E.length);
+  }
+  // Eliminar el panel admin completo del archivo del cliente
+  // Remover el div del overlay admin
+  h = h.replace(/]*>\s*/g, '');
+  h = h.replace(/<div id="adm-ov"[\s\S]*?<\/div>\s*<!-- ══ ENCUESTA/,  '<!-- ══ ENCUESTA');
+  // Remover botón de configurar
+  h = h.replace(/<div style="text-align:right[\s\S]*?<\/div>\s*<div class="la">/, '<div class="la">');
+  // Remover enlace admin del footer
+  h = h.replace(/&nbsp;&middot;&nbsp;<button onclick="openAdm\(\)"[^<]*<\/button>/g, '');
+  // Remover función openAdm y todo lo relacionado con admin del script
+  h = h.replace(/\/\* ════ ADMIN ════ \*\/[\s\S]*?\/\* ════ DESCARGAR ════ \*\//, '/* ════ DESCARGAR ════ */');
+  const blob=new Blob([h],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const slug=(CFG.c||'encuesta').replace(/[^a-zA-Z\u00C0-\u024F0-9 ]/g,'').trim().replace(/\s+/g,'-')||'Chapter-NPS';
+  a.href=url;a.download='Chapter-NPS-'+slug+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},600);
+}
+
+function dlClient(){
+  // Same as save but without updating CFG from form (just download current state)
+  CFG.questions = readQList();
+  CFG.c = document.getElementById('ac').value.trim();
+  CFG.n = document.getElementById('an').value.trim();
+  CFG.q = document.getElementById('aq').value;
+  CFG.y = document.getElementById('ay').value;
+  CFG.f = document.getElementById('af').value.trim();
+  downloadConfigured();
+}
+</script>
+
+</body></html>
